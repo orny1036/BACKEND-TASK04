@@ -39,6 +39,23 @@ export const getTasks = async (req, res) => {
     }
 };
 
+export const getAllTasksAdmin = async (req, res) => {
+    try {
+        const { status } = req.query;
+        let query = 'SELECT * FROM tasks WHERE isDeleted = 0';
+        let values = [];
+
+        if (status) {
+            query += ' AND status = ?';
+            values.push(status);
+        }
+
+        const [results] = await db.execute(query, values);
+        res.status(200).json({ success: true, count: results.length, data: results });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to fetch tasks', error: error.message });
+    }
+};
 // @desc --> Get single tasks
 // @route --> GET: /api/tasks/:id
 export const getTask = async (req, res) => {
