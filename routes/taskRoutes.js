@@ -8,8 +8,6 @@ router.get('/', protect, getTasks);
 
 router.post('/', protect, createTask);
 
-router.get('/admin/all', protect, authorizeRoles('admin'), getAllTasksAdmin);
-
 router.get('/:id', protect, getTask);
 
 router.put('/:id', protect, updateTask);

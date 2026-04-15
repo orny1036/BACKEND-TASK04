@@ -1,6 +1,6 @@
 import validator from "validator";
 
-export const validateRegister = ({ username, email, password }) => {
+export const validateRegister = ( username, email, password ) => {
     if (!username || username.length < 3) {
         return "Username must be at least 3 characters";
     }
