@@ -1,11 +1,6 @@
 import db from '../config/db.js';
 
-export const registerUserQuery = async (username, email, password, hashedPassword, role) => {
-
-    if (!username || !email || !password) {
-        throw new Error('Username, email, and password are required');
-    }
-
+export const registerUserQuery = async (username, email, hashedPassword, role) => {
     // 2. Insert into DB
     const query = `
             INSERT INTO users (username, email, password, role)
@@ -18,9 +13,6 @@ export const registerUserQuery = async (username, email, password, hashedPasswor
 
 export const loginUserQuery = async (email, password) => {
 
-    if (!email || !password) {
-        throw new Error('Email and password are required');
-    }
 
     const query = "SELECT id, email, password, role FROM users WHERE email = ?";
 

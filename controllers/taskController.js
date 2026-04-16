@@ -1,5 +1,6 @@
 import db from '../config/db.js';
 import { getAllTasksQueryResult, getUserTaskQueryResult, createUserTaskQuery, UpdateUserTaskQuery, DeleteUserTaskQuery } from '../models/taskModel.js';
+import { validateTask, validateTaskId } from '../utils/validate.js';
 
 // @desc --> Get all tasks
 // @route --> GET /tasks
@@ -34,13 +35,12 @@ export const getTask = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
 
+        validateTaskId(id);
+
         const result = await getUserTaskQueryResult(req.user.id, id, req.user.role);
         
         if (result.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'Task not found'
-            });
+            throw new Error('Task not found');
         }
 
         res.status(200).json({
@@ -49,6 +49,7 @@ export const getTask = async (req, res) => {
         });
 
     } catch (error) {
+        const status = error.statusCode || 500;
         return res.status(500).json({
             success: false,
             message: 'Database error',
@@ -63,7 +64,9 @@ export const createTask = async (req, res) => {
 
     try {
         const { title, description, status } = req.body;
-
+        
+        validateTask (req.body);
+        
         const result = await createUserTaskQuery(req.user.id, title, description, status)
 
         res.status(201).json({
@@ -79,6 +82,7 @@ export const createTask = async (req, res) => {
         });
 
     } catch (error) {
+        const status = error.statusCode || 500;
         return res.status(500).json({
             success: false,
             message: 'Server error',
@@ -94,8 +98,11 @@ export const updateTask = async (req, res) => {
     try {
 
         const id = parseInt(req.params.id);
-        const { title, description, status } = req.body;
 
+        validateTaskId(id);
+        
+        const { title, description, status } = req.body;
+        
         const updatedResult = await UpdateUserTaskQuery(req.user.id, id, req.user.role, title, description, status)
 
         res.status(200).json({
@@ -106,6 +113,7 @@ export const updateTask = async (req, res) => {
 
     }
     catch (error) {
+        const status = error.statusCode || 500;
         res.status(500).json({
             success: false,
             message: 'Database error',
@@ -121,7 +129,9 @@ export const deleteTask = async (req, res) => {
     try {
 
         const id = parseInt(req.params.id);
-        
+
+        validateTaskId(id);
+
         await DeleteUserTaskQuery(req.user.id, id, req.user.role);
 
         res.status(200).json({
@@ -130,6 +140,7 @@ export const deleteTask = async (req, res) => {
         });
 
     } catch (error) {
+        const status = error.statusCode || 500;
         res.status(500).json({
             success: false,
             message: 'Database error',

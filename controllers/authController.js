@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { validateRegister } from "../utils/validate.js";
+import { validateRegister, validateLogin } from "../utils/validate.js";
 import { registerUserQuery, loginUserQuery } from "../models/userModel.js";
 
 
@@ -17,17 +17,13 @@ export const registerUser = async (req, res) => {
             });
         }
         
-        const error = validateRegister(req.body);
-        if (error) {
-            return res.status(400).json({
-                success: false,
-                message: error
-            });
-        }
     try {
+
+        validateRegister(req.body);
+
         // 1. Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
-        const result = await registerUserQuery (username, email, password, hashedPassword, role);
+        const result = await registerUserQuery (username, email, hashedPassword, role);
         
             res.status(201).json({
                 success: true,
@@ -66,6 +62,9 @@ export const loginUser = async (req, res) => {
                 message: "Email and password are required"
             });
         }
+
+     validateLogin (req.body);
+
     try {
 
         const user = await loginUserQuery (email, password);

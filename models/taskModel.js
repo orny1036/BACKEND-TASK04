@@ -22,9 +22,6 @@ export const getAllTasksQueryResult = async (userId, userRole, Userstatus) => {
 
 export const getUserTaskQueryResult = async (userId, taskId, userRole) => {
     
-    if (isNaN(taskId)) {
-        throw new Error('Invalid Task ID');
-    }
     let query = 'SELECT * FROM tasks WHERE id = ? AND isDeleted = 0';
     let values = [taskId];
 
@@ -37,23 +34,6 @@ export const getUserTaskQueryResult = async (userId, taskId, userRole) => {
 }
 
 export const CreateUserTaskQuery = async (userId, title, description, status) => {
-   
-    if (!title || title.trim() === '') {
-        return res.status(400).json({
-            success: false,
-            message: 'Title is required'
-        });
-    }
-
-    const validStatus = ['to-do', 'in-progress', 'completed'];
-    const taskStatus = status || 'to-do';
-
-    if (!validStatus.includes(taskStatus)) {
-        return res.status(400).json({
-            success: false,
-            message: 'Invalid status value'
-        });
-    }
 
     const query = `INSERT INTO tasks
                     (title, description, status, user_id)
@@ -62,7 +42,7 @@ export const CreateUserTaskQuery = async (userId, title, description, status) =>
     const values = [
         title.trim(),
         description || null,
-        taskStatus,
+        status || 'to-do',
         userId
     ];
 
@@ -71,13 +51,6 @@ export const CreateUserTaskQuery = async (userId, title, description, status) =>
 }
 
 export const UpdateUserTaskQuery = async (userId, taskId, userRole, title, description, status) => {
-
-    if (isNaN(taskId)) {
-        return res.status(400).json({
-            success: false,
-            message: 'Invalid Task ID'
-        });
-    }
 
     let query = 'SELECT * FROM tasks WHERE id = ? AND isDeleted = 0';
     let params = [taskId];
@@ -90,26 +63,18 @@ export const UpdateUserTaskQuery = async (userId, taskId, userRole, title, descr
     const [result] = await db.execute(query, params);
 
     if (result.length === 0) {
-        return res.status(404).json({
-            success: false,
-            message: 'Task not found'
-        });
+        throw new Error('Task not found');
     }
 
     if (!title && !description && !status) {
-        return res.status(400).json({
-            success: false,
-            message: 'At least one field is required to update'
-        });
+        throw new Error('At least one field is required to update');
     }
 
     const validStatus = ['to-do', 'in-progress', 'completed'];
 
     if (status && !validStatus.includes(status)) {
-        return res.status(400).json({
-            success: false,
-            message: 'Invalid status value'
-        });
+
+        throw new Error('Invalid status value');
     }
 
     let fields = [];
@@ -161,13 +126,6 @@ export const UpdateUserTaskQuery = async (userId, taskId, userRole, title, descr
 
 export const DeleteUserTaskQuery = async (userId, userRole, taskId) => {
 
-        if (isNaN(taskId)) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid task ID'
-            });
-        }
-
         let query = 'SELECT * FROM tasks WHERE id = ? AND isDeleted = 0';
         let values = [taskId];
 
@@ -179,10 +137,7 @@ export const DeleteUserTaskQuery = async (userId, userRole, taskId) => {
         const [result] = await db.execute(query, values);
 
         if (result.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'Task not found'
-            });
+            throw new Error('Task not found');
         }
 
         if (userRole === "admin") {
