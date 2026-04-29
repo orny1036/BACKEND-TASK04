@@ -63,9 +63,9 @@ export const loginUser = async (req, res) => {
             });
         }
 
-     validateLogin (req.body);
-
     try {
+        
+        validateLogin(req.body);
 
         const user = await loginUserQuery (email, password);
 
@@ -78,17 +78,28 @@ export const loginUser = async (req, res) => {
             });
         }
 
-        // Create JWT
-        const token = jwt.sign(
+        // Create JWT access token (stateless, short)
+        const accesToken = jwt.sign(
             { id: user.id, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_EXPIRES_IN }
         );
+        
+        //Refresh token (random string, not a JWT)
+        const refreshToken = crypto.randomBytes(64).toString('hex');
+        
+        //Save to DB with expiry
+        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
+        await db.execute(
+            'INSERT INTO refresh_tokens (user_id, token, expires_at) VALUES (?, ?, ?)', 
+            [user.id, refreshToken, expiresAt]
+        );
             res.json({
                 success: true,
                 message: "Login successful",
-                token
+                accesToken,
+                refreshToken
             });
         
     } catch (error) {
@@ -98,4 +109,56 @@ export const loginUser = async (req, res) => {
         });
     }
 
+};
+
+export const refreshAccessToken = async (req, res) => {
+    const { refreshToken } = req.body;
+
+    if(!refreshToken) {
+        return res.status(400).json({ success: false, message: 'Refresh token required.' })
+    }
+
+    try {
+
+        const [ rows ] = await db.execute (
+            'SELECT * FROM refresh_tokens WHERE token = ?'
+            [refreshToken]
+        );
+        if(rows.length === 0) {
+            return res.status(401).json({ success: false, message: 'Invalid refresh token.' })
+        }
+
+        const storedToken = rows[0];
+
+        if(new Date() > new Date(storedToken.expires_at)) {
+            await db.execute(
+                'DELETE FROM refresh_tokens WHERE token = ?',
+                [refreshToken]
+            );
+            return res.status(401).json({ success: false, message: 'Refresh token expired. Please login again.' })
+        }
+        const accessToken = jwt.sign(
+            { id: storedToken.user_id },
+            process.env.JWT_SECRET,
+            {expiresIn: process.env.JWT_EXPIRES_IN}
+        );
+        res.json({ success:true, accessToken });
+
+    } catch (error) {
+      res.status(500).json({ success:false, message: 'Server error' });
+    }
+};
+
+export const logoutUser = async (req, res) {
+    const { refreshToken } = req.body;
+
+    if(!refreshToken) {
+        return res.status(400).json({ success: false, message: 'Refresh token required.' });
+    }
+    try {
+        await db.execute('DELETE FROM refresh_tokens WHERE token = ?', [refreshToken]);
+        res.json({ success: false, message: 'Logged out successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
 };

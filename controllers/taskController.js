@@ -20,7 +20,7 @@ export const getTasks = async (req, res) => {
 
     } catch (error) {
 
-        return res.status(500).json({
+        return res.status(status).json({
             success: false,
             message: 'Failed to fetch tasks',
             error: error.message
@@ -50,7 +50,7 @@ export const getTask = async (req, res) => {
 
     } catch (error) {
         const status = error.statusCode || 500;
-        return res.status(500).json({
+        return res.status(status).json({
             success: false,
             message: 'Database error',
             error: error.message
@@ -83,7 +83,7 @@ export const createTask = async (req, res) => {
 
     } catch (error) {
         const status = error.statusCode || 500;
-        return res.status(500).json({
+        return res.status(status).json({
             success: false,
             message: 'Server error',
             error: error.message
@@ -114,7 +114,7 @@ export const updateTask = async (req, res) => {
     }
     catch (error) {
         const status = error.statusCode || 500;
-        res.status(500).json({
+        res.status(status).json({
             success: false,
             message: 'Database error',
             error: error.message
@@ -141,7 +141,7 @@ export const deleteTask = async (req, res) => {
 
     } catch (error) {
         const status = error.statusCode || 500;
-        res.status(500).json({
+        res.status(status).json({
             success: false,
             message: 'Database error',
             error: error.message
