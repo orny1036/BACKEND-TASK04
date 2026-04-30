@@ -162,3 +162,17 @@ export const logoutUser = async (req, res) {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
+
+export const logoutAllDevices = async (req, res) => {
+    try {
+        await db.execute(
+            'DELETE FROM refresh_tokens WHERE user_id = ?',
+            [req.user.id]  // comes from protect middleware
+        );
+
+        res.json({ success: true, message: 'Logged out from all devices' });
+
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+}
