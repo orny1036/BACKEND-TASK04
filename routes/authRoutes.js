@@ -16,4 +16,5 @@ router.post('/logout', protect, logoutUser);
 
 router.post('/logout-all', protect, logoutAllDevices);
 
+router.post('/forgot-password', )
 export default router;
