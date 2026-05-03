@@ -5,7 +5,8 @@ import crypto from "crypto";
 import transporter from "../config/mailer.js";
 
 import { validateRegister, validateLogin } from "../utils/validate.js";
-import { registerUserQuery, loginUserQuery, storeRefreshToken, 
+import {
+    registerUserQuery, findExistingUser, loginUserQuery, storeRefreshToken, 
     getRefreshToken, deleteRefreshToken, deleteRefreshTokenByUser, 
     findUserByEmail, saveResetToken, checkResetToken, deleteResetToken, resetPasswordQuery } from "../models/userModel.js";
 
@@ -25,7 +26,7 @@ export const registerUser = async (req, res) => {
     try {
 
         validateRegister(req.body);
-
+        await findExistingUser(username, email);
         // 1. Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
         const result = await registerUserQuery(username, email, hashedPassword, role);
@@ -41,17 +42,10 @@ export const registerUser = async (req, res) => {
         });
 
     } catch (error) {
-
-        if (error.code === "ER_DUP_ENTRY") {
-            return res.status(400).json({
-                success: false,
-                message: "Email or username already exists"
-            });
-        }
-
-        return res.status(500).json({
+        const status = error.statusCode || 500;
+        return res.status(status).json({
             success: false,
-            message: "Server error",
+            message: 'Database error',
             error: error.message
         });
     }

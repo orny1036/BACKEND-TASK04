@@ -1,5 +1,5 @@
 import db from '../config/db.js';
-import { getAllTasksQueryResult, getUserTaskQueryResult, createUserTaskQuery, UpdateUserTaskQuery, DeleteUserTaskQuery } from '../models/taskModel.js';
+import { getAllTasksQueryResult, getUserTaskQueryResult, createUserTaskQuery, updateUserTaskQuery, deleteUserTaskQuery } from '../models/taskModel.js';
 import { validateTask, validateTaskId } from '../utils/validate.js';
 
 // @desc --> Get all tasks
@@ -19,10 +19,10 @@ export const getTasks = async (req, res) => {
         });
 
     } catch (error) {
-
+        const status = error.statusCode || 500;
         return res.status(status).json({
             success: false,
-            message: 'Failed to fetch tasks',
+            message: 'Database error',
             error: error.message
         });
     }
@@ -103,7 +103,7 @@ export const updateTask = async (req, res) => {
         
         const { title, description, status } = req.body;
         
-        const updatedResult = await UpdateUserTaskQuery(req.user.id, id, req.user.role, title, description, status)
+        const updatedResult = await updateUserTaskQuery(req.user.id, id, req.user.role, title, description, status)
 
         res.status(200).json({
             success: true,
@@ -132,7 +132,7 @@ export const deleteTask = async (req, res) => {
 
         validateTaskId(id);
 
-        await DeleteUserTaskQuery(req.user.id, id, req.user.role);
+        await deleteUserTaskQuery(req.user.id, id, req.user.role);
 
         res.status(200).json({
             success: true,

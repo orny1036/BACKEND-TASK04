@@ -1,5 +1,5 @@
 import express from 'express';
-import { getTasks, createTask, getTask, updateTask, deleteTask, getAllTasksAdmin } from '../controllers/taskController.js';
+import { getTasks, createTask, getTask, updateTask, deleteTask } from '../controllers/taskController.js';
 import { protect, authorizeRoles } from '../middleware/authMiddleware.js';
 
 const router = express.Router();

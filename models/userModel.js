@@ -10,6 +10,29 @@ export const registerUserQuery = async (username, email, hashedPassword, role) =
     const [result] = await db.execute(query, [username, email, hashedPassword, role]);
     return result;
 }
+export const findExistingUser = async (username, email) => {
+   
+    const [ rows ] = await db.execute(
+        'SELECT * FROM users WHERE email = ? OR username = ?', 
+        [email, username]
+    );
+    if (rows.length !== 0) {
+       const existingUser = rows[0];
+
+       if(existingUser.email === email)
+       {
+        const err = new Error ('Email already exists');
+        err.statusCode = 400;
+        throw err;
+       }
+      if (existingUser.username === username) {
+            const err = new Error('Username already exists');
+            err.statusCode = 400;
+            throw err;
+        }
+    }
+
+}
 
 export const loginUserQuery = async (email) => {
 

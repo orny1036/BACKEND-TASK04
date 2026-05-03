@@ -33,7 +33,7 @@ export const getUserTaskQueryResult = async (userId, taskId, userRole) => {
     return result;
 }
 
-export const CreateUserTaskQuery = async (userId, title, description, status) => {
+export const createUserTaskQuery = async (userId, title, description, status) => {
 
     const query = `INSERT INTO tasks
                     (title, description, status, user_id)
@@ -50,7 +50,7 @@ export const CreateUserTaskQuery = async (userId, title, description, status) =>
     return result;
 }
 
-export const UpdateUserTaskQuery = async (userId, taskId, userRole, title, description, status) => {
+export const updateUserTaskQuery = async (userId, taskId, userRole, title, description, status) => {
 
     let query = 'SELECT * FROM tasks WHERE id = ? AND isDeleted = 0';
     let params = [taskId];
@@ -124,7 +124,7 @@ export const UpdateUserTaskQuery = async (userId, taskId, userRole, title, descr
     return updatedResult;
 }
 
-export const DeleteUserTaskQuery = async (userId, userRole, taskId) => {
+export const deleteUserTaskQuery = async (userId, userRole, taskId) => {
 
         let query = 'SELECT * FROM tasks WHERE id = ? AND isDeleted = 0';
         let values = [taskId];
