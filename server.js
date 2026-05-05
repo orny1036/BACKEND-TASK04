@@ -6,7 +6,6 @@ import errorHandler from './middleware/errorHandler.js';
 import notFound from './middleware/notFoundHandler.js';
 import db from './config/db.js';
 import 'dotenv/config';
-import { resetPassword } from './controllers/authController.js';
 
 const app = express();
 const port = process.env.PORT || 5000;

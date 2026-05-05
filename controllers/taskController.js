@@ -132,7 +132,7 @@ export const deleteTask = async (req, res) => {
 
         validateTaskId(id);
 
-        await deleteUserTaskQuery(req.user.id, id, req.user.role);
+        await deleteUserTaskQuery(req.user.id, req.user.role, id);
 
         res.status(200).json({
             success: true,

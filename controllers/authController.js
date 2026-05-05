@@ -83,7 +83,7 @@ export const loginUser = async (req, res) => {
         //Save to DB with expiry
         const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
         
-        storeRefreshToken(user.id, refreshToken, expiresAt);
+        await storeRefreshToken(user.id, refreshToken, expiresAt);
         
         res.json({
             success: true,
@@ -112,7 +112,7 @@ export const refreshAccessToken = async (req, res) => {
 
         const storedToken = await getRefreshToken(refreshToken);
 
-        if (storedToken.length === 0) {
+        if (!storedToken) {
             return res.status(400).json({ success: false, message: 'Invalid refresh token.' });
         }
 
@@ -191,7 +191,7 @@ export const forgotPassword = async (req, res) => {
             from: process.env.EMAIL_USER,
             to: email,
             subject: 'Password Reset Request',
-            html: `<p>Click <a href="${resetLink}">here</a> to reset your password. Expires in 15 minutes.</p>`
+            html: `<p>Click <a href="${resetLink}">here</a> to reset your password. Expires in 10 minutes.</p>`
         });
 
         res.json({
@@ -214,8 +214,8 @@ export const resetPassword = async (req, res) => {
     }
     try {
         const storedToken = await checkResetToken(resetToken);
-        if (storedToken.length === 0) {
-            return res.status(400).json({ success: false, message: 'Invalid refresh token.' });
+        if (!storedToken) {
+            return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
         }
 
         if(new Date() > new Date(storedToken.expires_at)) {

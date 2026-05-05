@@ -1,6 +1,4 @@
 import logger from '../config/logger.js';
-import router from '../routes/taskRoutes.js';
-
 
 const errorHandler = (err, req, res, next) => {
     
